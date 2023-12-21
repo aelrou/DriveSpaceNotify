@@ -56,7 +56,7 @@ if ($Warning -or $StartTime.ToString("ddd") -eq "Mon") {
     [int]$SMTPPort = 587
     [string]$Sender = "sender@address.com"
     [string]$Recipient = "recipient@address.com"
-    [string]$MailSubject = "Storage status"
+    [string]$MailSubject = "Storage status $($StartTime.ToString("yyyy-MM-dd"))"
     Send-MailMessage -From $Sender -To $Recipient -Subject $MailSubject -Body $WarningDetails -SmtpServer $SMTPServer -Port $SMTPPort -Credential $SMTPCredential -UseSsl
 }
 
