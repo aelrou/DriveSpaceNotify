@@ -20,7 +20,7 @@ foreach ($DriveInformation in $DriveInformationBatch) {
     [long]$Size = ($DriveInformation | Select-Object -ExpandProperty Size)
     
     if ($FirstLine -eq $true) {
-        $WarningDetails = $WarningDetails + "Storage space on $($StartTime.ToString("yyyy-MM-dd"))`r`n"
+        $WarningDetails = $WarningDetails + "Storage and memory status on $($StartTime.ToString("yyyy-MM-dd"))`r`n"
         $WarningDetails = $WarningDetails + "----------------`r`n"
         $FirstLine = $false
     }
@@ -49,15 +49,37 @@ foreach ($DriveInformation in $DriveInformationBatch) {
     $WarningDetails = $WarningDetails + "----------------`r`n"
 }
 
-if ($Warning -or $StartTime.ToString("ddd") -eq "Mon") {
+[uint64]$TotalPhysicalMemoryByte = (Get-WMIObject Win32_ComputerSystem | Select-Object -ExpandProperty TotalPhysicalMemory)
+[int]$TotalPhysicalMemoryMB = ([System.Math]::Round(($TotalPhysicalMemoryByte/1024/1024),0))
+#Write-Host $TotalPhysicalMemoryMB
+
+[uint64]$FreePhysicalMemoryKB = (Get-CIMInstance Win32_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory)
+$FreePhysicalMemoryMB = ([System.Math]::Round(($FreePhysicalMemoryKB/1024),0))
+#Write-Host $FreePhysicalMemoryMB
+
+$WarningDetails = $WarningDetails + "Memory:`r`n"
+
+if ($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB -lt 0.1) {
+    $Warning = $true
+    $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB))*100),0))% in-use        >>>>>>>> WARNING <<<<<<<<`r`n"
+} else {
+    $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB))*100),0))% in-use`r`n"
+}
+
+$WarningDetails = $WarningDetails + "$($FreePhysicalMemoryMB) MB free`r`n"
+$WarningDetails = $WarningDetails + "$($TotalPhysicalMemoryMB) MB total`r`n"
+$WarningDetails = $WarningDetails + "----------------`r`n"
+
+if ($Warning -or $StartTime.ToString("ddd") -eq "Thu") {
     $SMTPSecureString = ConvertTo-SecureString -String "password" -AsPlainText -Force
     $SMTPCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "username", $SMTPSecureString
     [string]$SMTPServer = "smtp.server.com"
     [int]$SMTPPort = 587
     [string]$Sender = "sender@address.com"
     [string]$Recipient = "recipient@address.com"
-    [string]$MailSubject = "Storage status $($StartTime.ToString("yyyy-MM-dd"))"
-    Send-MailMessage -From $Sender -To $Recipient -Subject $MailSubject -Body $WarningDetails -SmtpServer $SMTPServer -Port $SMTPPort -Credential $SMTPCredential -UseSsl
+    [string]$MailSubject = "Storage and memory status $($StartTime.ToString("yyyy-MM-dd"))"
+    Write-Host $WarningDetails
+    #Send-MailMessage -From $Sender -To $Recipient -Subject $MailSubject -Body $WarningDetails -SmtpServer $SMTPServer -Port $SMTPPort -Credential $SMTPCredential -UseSsl
 }
 
 exit 0
