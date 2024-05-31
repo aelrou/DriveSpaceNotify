@@ -56,15 +56,15 @@ foreach ($DriveInformation in $DriveInformationBatch) {
 $FreePhysicalMemoryMB = ([System.Math]::Round(($FreePhysicalMemoryKB/1024),0))
 
 $WarningDetails = $WarningDetails + "Memory:`r`n"
+$WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB))*100),0))% in-use`r`n"
 
-if ($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB -lt 0.1) {
+if ($FreePhysicalMemoryMB -lt 2048) {
     $Warning = $true
-    $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB))*100),0))% in-use        >>>>>>>> WARNING <<<<<<<<`r`n"
+    $WarningDetails = $WarningDetails + "$($FreePhysicalMemoryMB) MB free        >>>>>>>> WARNING <<<<<<<<`r`n"
 } else {
-    $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB))*100),0))% in-use`r`n"
+    $WarningDetails = $WarningDetails + "$($FreePhysicalMemoryMB) MB free`r`n"
 }
 
-$WarningDetails = $WarningDetails + "$($FreePhysicalMemoryMB) MB free`r`n"
 $WarningDetails = $WarningDetails + "$($TotalPhysicalMemoryMB) MB total`r`n"
 $WarningDetails = $WarningDetails + "----------------`r`n"
 
