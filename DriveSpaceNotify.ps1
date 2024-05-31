@@ -68,7 +68,7 @@ if ($FreePhysicalMemoryMB -lt 2048) {
 $WarningDetails = $WarningDetails + "$($TotalPhysicalMemoryMB) MB total`r`n"
 $WarningDetails = $WarningDetails + "----------------`r`n"
 
-if ($Warning -or $StartTime.ToString("ddd") -eq "Thu") {
+if ($Warning -or $StartTime.ToString("ddd") -eq "Mon") {
     $SMTPSecureString = ConvertTo-SecureString -String "password" -AsPlainText -Force
     $SMTPCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "username", $SMTPSecureString
     [string]$SMTPServer = "smtp.server.com"
