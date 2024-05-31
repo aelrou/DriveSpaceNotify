@@ -53,7 +53,7 @@ foreach ($DriveInformation in $DriveInformationBatch) {
 [int]$TotalPhysicalMemoryMB = ([System.Math]::Round(($TotalPhysicalMemoryByte/1024/1024),0))
 
 [uint64]$FreePhysicalMemoryKB = (Get-CIMInstance Win32_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory)
-$FreePhysicalMemoryMB = ([System.Math]::Round(($FreePhysicalMemoryKB/1024),0))
+[int]$FreePhysicalMemoryMB = ([System.Math]::Round(($FreePhysicalMemoryKB/1024),0))
 
 $WarningDetails = $WarningDetails + "Memory:`r`n"
 $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($FreePhysicalMemoryMB/$TotalPhysicalMemoryMB))*100),0))% in-use`r`n"
