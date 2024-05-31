@@ -51,11 +51,9 @@ foreach ($DriveInformation in $DriveInformationBatch) {
 
 [uint64]$TotalPhysicalMemoryByte = (Get-WMIObject Win32_ComputerSystem | Select-Object -ExpandProperty TotalPhysicalMemory)
 [int]$TotalPhysicalMemoryMB = ([System.Math]::Round(($TotalPhysicalMemoryByte/1024/1024),0))
-#Write-Host $TotalPhysicalMemoryMB
 
 [uint64]$FreePhysicalMemoryKB = (Get-CIMInstance Win32_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory)
 $FreePhysicalMemoryMB = ([System.Math]::Round(($FreePhysicalMemoryKB/1024),0))
-#Write-Host $FreePhysicalMemoryMB
 
 $WarningDetails = $WarningDetails + "Memory:`r`n"
 
@@ -79,7 +77,7 @@ if ($Warning -or $StartTime.ToString("ddd") -eq "Thu") {
     [string]$Recipient = "recipient@address.com"
     [string]$MailSubject = "Storage and memory status $($StartTime.ToString("yyyy-MM-dd"))"
     Write-Host $WarningDetails
-    #Send-MailMessage -From $Sender -To $Recipient -Subject $MailSubject -Body $WarningDetails -SmtpServer $SMTPServer -Port $SMTPPort -Credential $SMTPCredential -UseSsl
+    Send-MailMessage -From $Sender -To $Recipient -Subject $MailSubject -Body $WarningDetails -SmtpServer $SMTPServer -Port $SMTPPort -Credential $SMTPCredential -UseSsl
 }
 
 exit 0
