@@ -11,14 +11,20 @@ $Warning = $false
 foreach ($DriveInformation in $DriveInformationBatch) {
     [String]$DriveLetter = $null
     [String]$FriendlyName = $null
-    [long]$SizeRemaining = $null
-    [long]$Size = $null
+    [long]$DriveSizeRemainingBytes = $null
+    [long]$DriveSizeRemainingMB = $null
+    [long]$DriveSizeBytes = $null
+    [long]$DriveSizeMB = $null   
 
     [String]$DriveLetter = ($DriveInformation | Select-Object -ExpandProperty DriveLetter)
     [String]$FriendlyName = ($DriveInformation | Select-Object -ExpandProperty FriendlyName)
-    [long]$SizeRemaining = ($DriveInformation | Select-Object -ExpandProperty SizeRemaining)
-    [long]$Size = ($DriveInformation | Select-Object -ExpandProperty Size)
-    
+
+    [long]$DriveSizeRemainingBytes = ($DriveInformation | Select-Object -ExpandProperty SizeRemaining)
+    [int]$DriveSizeRemainingMB = ([System.Math]::Round(($DriveSizeRemainingBytes/1024/1024),0))
+
+    [long]$DriveSizeBytes = ($DriveInformation | Select-Object -ExpandProperty Size)
+    [int]$DriveSizeMB = ([System.Math]::Round(($DriveSizeBytes/1024/1024),0))
+
     if ($FirstLine -eq $true) {
         $WarningDetails = $WarningDetails + "Storage and memory status on $($StartTime.ToString("yyyy-MM-dd"))`r`n"
         $WarningDetails = $WarningDetails + "----------------`r`n"
@@ -37,20 +43,24 @@ foreach ($DriveInformation in $DriveInformationBatch) {
         $WarningDetails = $WarningDetails + "Drive $($DriveLetter):`r`n"
     }
 
-    if ($SizeRemaining/$Size -lt 0.1) {
-        $Warning = $true
-        $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($SizeRemaining/$Size))*100),0))% full        >>>>>>>> WARNING <<<<<<<<`r`n"
+    if ($DriveSizeRemainingMB/$DriveSizeMB -lt 0.1) {
+        if ($DriveSizeRemainingMB -lt 10240) {
+            $Warning = $true
+            $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($DriveSizeRemainingMB/$DriveSizeMB))*100),0))% full        >>>>>>>> WARNING <<<<<<<<`r`n"
+        } else {
+			$WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($DriveSizeRemainingMB/$DriveSizeMB))*100),0))% full`r`n"
+		}
     } else {
-        $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($SizeRemaining/$Size))*100),0))% full`r`n"
+        $WarningDetails = $WarningDetails + "$([System.Math]::Round(((1-($DriveSizeRemainingMB/$DriveSizeMB))*100),0))% full`r`n"
     }
     
-    $WarningDetails = $WarningDetails + "$([System.Math]::Round(($SizeRemaining/1024/1024/1024),0)) GB free space`r`n"
-    $WarningDetails = $WarningDetails + "$([System.Math]::Round(($Size/1024/1024/1024),0)) GB capacity`r`n"
+    $WarningDetails = $WarningDetails + "$([System.Math]::Round(($DriveSizeRemainingMB/1024),0)) GB free space`r`n"
+    $WarningDetails = $WarningDetails + "$([System.Math]::Round(($DriveSizeMB/1024),0)) GB capacity`r`n"
     $WarningDetails = $WarningDetails + "----------------`r`n"
 }
 
-[uint64]$TotalPhysicalMemoryByte = (Get-WMIObject Win32_ComputerSystem | Select-Object -ExpandProperty TotalPhysicalMemory)
-[int]$TotalPhysicalMemoryMB = ([System.Math]::Round(($TotalPhysicalMemoryByte/1024/1024),0))
+[uint64]$TotalPhysicalMemoryBytes = (Get-WMIObject Win32_ComputerSystem | Select-Object -ExpandProperty TotalPhysicalMemory)
+[int]$TotalPhysicalMemoryMB = ([System.Math]::Round(($TotalPhysicalMemoryBytes/1024/1024),0))
 
 [uint64]$FreePhysicalMemoryKB = (Get-CIMInstance Win32_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory)
 [int]$FreePhysicalMemoryMB = ([System.Math]::Round(($FreePhysicalMemoryKB/1024),0))
